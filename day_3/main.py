@@ -1,3 +1,5 @@
+from functools import reduce
+
 INPUT_FILE_NAME = 'input.txt'
 TREE = '#'
 OPEN = '.'
@@ -33,16 +35,36 @@ def load_map():
         return EnvMap(input_file.read())
 
 
-def main():
-    env_map = load_map()
+def count_trees(env_map, slope):
     tree_count = 0
     location = (0, 0)
     while env_map.char_at(*location) is not None:
         char_at_location = env_map.char_at(location[0], location[1])
         if char_at_location == TREE:
             tree_count = tree_count + 1
-        location = (location[0] + 1, location[1] + 3)
+        location = (location[0] + slope[0], location[1] + slope[1])
+    return tree_count
+
+
+def main_part_one():
+    env_map = load_map()
+    tree_count = count_trees(env_map, (1, 3))
     print(f'There are {tree_count} trees')
 
+
+def main_part_two():
+    slopes = [
+        (1, 1),
+        (1, 3),
+        (1, 5),
+        (1, 7),
+        (2, 1)
+    ]
+    env_map = load_map()
+    tree_counts = [count_trees(env_map, slope) for slope in slopes]
+    print(f'Tree counts multiplied together is equal to {reduce(lambda x, y: x * y, tree_counts)}')
+
+
 if __name__ == '__main__':
-    main()
+    main_part_one()
+    main_part_two()
