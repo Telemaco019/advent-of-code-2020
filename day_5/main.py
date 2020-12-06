@@ -1,4 +1,5 @@
 import math
+import unittest
 
 INPUT_FILE_NAME = 'input.txt'
 
@@ -46,31 +47,22 @@ def get_boarding_pass_id(boarding_pass):
     return row_index * 8 + column_index
 
 
-def run_tests():
-    actual = get_boarding_pass_id('FBFBBFFRLR')
-    expected = 357
-    if expected != actual:
-        raise Exception(f'Expected {expected} but instead got {actual}')
+class TestBoardingPassIdGeneration(unittest.TestCase):
+    def test_id(self):
+        first_generated = get_boarding_pass_id('FBFBBFFRLR')
+        self.assertEqual(first_generated, 357)
 
-    actual = get_boarding_pass_id('BFFFBBFRRR')
-    expected = 567
-    if expected != actual:
-        raise Exception(f'Expected {expected} but instead got {actual}')
+        second_generated = get_boarding_pass_id('BFFFBBFRRR')
+        self.assertEqual(second_generated, 567)
 
-    actual = get_boarding_pass_id('FFFBBBFRRR')
-    expected = 119
-    if expected != actual:
-        raise Exception(f'Expected {expected} but instead got {actual}')
+        third_generated = get_boarding_pass_id('FFFBBBFRRR')
+        self.assertEqual(third_generated, 119)
 
-    actual = get_boarding_pass_id('BBFFBBFRLL')
-    expected = 820
-    if expected != actual:
-        raise Exception(f'Expected {expected} but instead got {actual}')
+        fourth_generated = get_boarding_pass_id('BBFFBBFRLL')
+        self.assertEqual(fourth_generated, 820)
 
 
 def main():
-    run_tests()
-
     boarding_pass_list = load_boarding_pass_list()
     boarding_pass_id_list = [get_boarding_pass_id(boarding_pass) for boarding_pass in boarding_pass_list]
     print(f'The highest id is {max(boarding_pass_id_list)}')
@@ -78,3 +70,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    unittest.main()
