@@ -67,6 +67,14 @@ def main():
     boarding_pass_id_list = [get_boarding_pass_id(boarding_pass) for boarding_pass in boarding_pass_list]
     print(f'The highest id is {max(boarding_pass_id_list)}')
 
+    # Part 2 - Find the ID of the seat
+    for i in range(0, len(boarding_pass_id_list)):
+        for j in range(i + 1, len(boarding_pass_id_list)):
+            if abs(boarding_pass_id_list[i] - boarding_pass_id_list[j]) == 2:
+                id = max(boarding_pass_id_list[i], boarding_pass_id_list[j]) - 1
+                if id not in boarding_pass_id_list:
+                    print(f'The ID is {id}')
+
 
 if __name__ == '__main__':
     main()
