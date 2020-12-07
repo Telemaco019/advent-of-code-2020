@@ -1,3 +1,4 @@
+import string
 import unittest
 
 INPUT_FILE = 'input.txt'
@@ -21,11 +22,18 @@ def flatten(input_list):
 
 class Group:
     def __init__(self, answers_str):
-        answers_by_person = [answer.strip() for answer in answers_str.split('\n') if answer.strip()]
-        self.answers = flatten([list(answers) for answers in answers_by_person])
+        self.answers_by_person = [answer.strip() for answer in answers_str.split('\n') if answer.strip()]
+        self.all_answers = flatten([list(answers) for answers in self.answers_by_person])
 
     def get_distinct_answers_count(self):
-        return len(set(self.answers))
+        return len(set(self.all_answers))
+
+    def get_answers_intersection_count(self):
+        answers_intersection = []
+        for answer in string.ascii_lowercase:
+            if all(answer in person_answers_list for person_answers_list in self.answers_by_person):
+                answers_intersection.append(answer)
+        return len(answers_intersection)
 
 
 def load_groups(input_file_name):
@@ -40,10 +48,20 @@ class PartOneTest(unittest.TestCase):
         self.assertEqual(answers_sum, 11)
 
 
+class PartTwoTest(unittest.TestCase):
+    def test_counts(self):
+        groups = load_groups(TEST_INPUT_FILE)
+        answers_sum = sum([group.get_answers_intersection_count() for group in groups])
+        self.assertEqual(answers_sum, 6)
+
+
 def main():
     groups = load_groups(INPUT_FILE)
-    answers_sum = sum([group.get_distinct_answers_count() for group in groups])
-    print(f'The sum of the counts is {answers_sum}')
+    answers_sum_part_one = sum([group.get_distinct_answers_count() for group in groups])
+    answers_sum_part_two = sum([group.get_answers_intersection_count() for group in groups])
+
+    print(f'The sum of the counts for part 1 is {answers_sum_part_one}')
+    print(f'The sum of the counts for part 2 is {answers_sum_part_two}')
 
 
 if __name__ == '__main__':
