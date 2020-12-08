@@ -64,6 +64,16 @@ class Bag:
         else:
             return any(self.is_descendant_of(node, hierarchy_map) for node in bag.contained_bags.keys())
 
+    def get_contained_bags_count(self):
+        count = 0
+        for contained_bag, contained_bag_occurrences in self.contained_bags.items():
+            contained_bag_descendants_count = contained_bag.get_contained_bags_count()
+            if contained_bag_descendants_count == 0:
+                count += contained_bag_occurrences
+            else:
+                count += contained_bag_occurrences + contained_bag_occurrences * contained_bag_descendants_count
+        return count
+
 
 def load_all_bags(input_file_name):
     colors_with_children_dict = load_colors_and_children_dict(input_file_name)
@@ -90,6 +100,7 @@ class PartTwoTest(unittest.TestCase):
     def test_counts(self):
         bags = load_all_bags(TEST_INPUT_FILE_NAME)
         shiny_gold_bag = next(b for b in bags if b.color == 'shiny gold')
+        self.assertEqual(shiny_gold_bag.get_contained_bags_count(), 32)
 
 
 def part_one():
@@ -99,8 +110,15 @@ def part_one():
     print(f'{shiny_gold_containers_count} different colors can contain {shiny_gold_bag.color} bag')
 
 
+def part_two():
+    bags = load_all_bags(INPUT_FILE_NAME)
+    shiny_gold_bag = next(b for b in bags if b.color == 'shiny gold')
+    print(f'{shiny_gold_bag.color} contains {shiny_gold_bag.get_contained_bags_count()} different bags')
+
+
 def main():
     part_one()
+    part_two()
 
 
 if __name__ == '__main__':
