@@ -24,6 +24,7 @@ class ExecutionState:
 class Instruction(metaclass=ABCMeta):
     def __init__(self, argument):
         self.executions_count = 0
+        self.argument = argument
         self.argument_sign = argument[0]
         self.argument_value = int(argument[1:])
 
@@ -71,12 +72,16 @@ class Executor:
 
     def run(self):
         index = self.execution_state.current_instruction_index
-        instruction = self.execution_state.instruction_list[index]
-        if instruction.executions_count == 0:
-            instruction.execute(self.execution_state)
-            if self.execution_state.current_instruction_index == index:
-                self.execution_state.current_instruction_index += 1
-            self.run()
+
+        if index < len(self.execution_state.instruction_list):
+            instruction = self.execution_state.instruction_list[index]
+            if instruction.executions_count == 0:
+                instruction.execute(self.execution_state)
+                if self.execution_state.current_instruction_index == index:
+                    self.execution_state.current_instruction_index += 1
+                self.run()
+            else:
+                raise Exception('Loop!')
 
 
 class InstructionFactory:
@@ -100,25 +105,81 @@ def load_instructions(file_name):
     return [InstructionFactory.from_instruction_name(*line.split(' ')) for line in lines]
 
 
-class PartOneTest(unittest.TestCase):
-    def test_count(self):
-        instruction_list = load_instructions(TEST_INPUT_FILE_NAME)
-        state = ExecutionState(instruction_list)
+def try_execution_without_loops(state: ExecutionState):
+    try:
         executor = Executor(state)
         executor.run()
-        self.assertEqual(state.accumulator, 5)
+        return True
+    except Exception:
+        return False
+
+
+def get_accumulator_value_for_fixed_instructions(input_file_name):
+    original_instruction_list = load_instructions(input_file_name)
+
+    for i in range(0, len(original_instruction_list)):
+        no_loop = False
+        instruction_list = original_instruction_list.copy()
+
+        for instruction in instruction_list:
+            instruction.executions_count = 0
+
+        state = ExecutionState(instruction_list)
+
+        if isinstance(instruction_list[i], NoOpInstruction):
+            instruction_list[i] = JumpInstruction(instruction_list[i].argument)
+            no_loop = try_execution_without_loops(state)
+        elif isinstance(instruction_list[i], JumpInstruction):
+            instruction_list[i] = NoOpInstruction(instruction_list[i].argument)
+            no_loop = try_execution_without_loops(state)
+
+        if no_loop:
+            return state.accumulator
+
+    return None
 
 
 def part_one():
     instruction_list = load_instructions(INPUT_FILE_NAME)
     state = ExecutionState(instruction_list)
-    executor = Executor(state)
-    executor.run()
+
+    try:
+        executor = Executor(state)
+        executor.run()
+    except Exception:
+        pass
+
     print(f'The value of the accumulator is {state.accumulator}')
+
+
+def part_two():
+    value = get_accumulator_value_for_fixed_instructions(INPUT_FILE_NAME)
+    print(f'The value of the accumulator is {value}')
 
 
 def main():
     part_one()
+    part_two()
+
+
+class PartOneTest(unittest.TestCase):
+    def test_count(self):
+        instruction_list = load_instructions(TEST_INPUT_FILE_NAME)
+        state = ExecutionState(instruction_list)
+
+        try:
+            executor = Executor(state)
+            executor.run()
+        except Exception:
+            pass
+
+        self.assertEqual(state.accumulator, 5)
+
+
+class PartTwoTest(unittest.TestCase):
+    def test_count(self):
+        value = get_accumulator_value_for_fixed_instructions(TEST_INPUT_FILE_NAME)
+        self.assertEqual(value, 8)
 
 
 if __name__ == '__main__':
